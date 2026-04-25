@@ -9,19 +9,19 @@ import (
 var fileData []byte
 
 type References struct{
-	Vector []float64 `json:"vector"`
+	Vector [14]float64 `json:"vector"`
 	Label string `json:"label"`
-
 }
 
-func GetReferences() []References{
-	var list []References
+var cached []References
 
-	err := json.Unmarshal(fileData, &list)
-
+func init(){
+	err := json.Unmarshal(fileData, &cached)
 	if err !=nil {
 		panic(err)
 	}
+}
 
-	return list
+func GetReferences() []References{
+	return cached
 }
