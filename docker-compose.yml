@@ -1,0 +1,44 @@
+version: '3.8'
+
+x-api-template: &api-template
+  build: ./Api
+  platform: linux/amd64
+  volumes:
+    - sockets:/sockets
+  deploy:
+    resources:
+      limits:
+        cpus: "0.35"
+        memory: 150MB
+
+services:
+  api-1:
+    <<: *api-template
+    environment:
+      RINHA_RESOURCES_DIR: /app/resources
+      RINHA_SOCKET_PATH: /sockets/api-1.sock
+
+  api-2:
+    <<: *api-template
+    environment:
+      RINHA_RESOURCES_DIR: /app/resources
+      RINHA_UNIX_SOCKET_PATH: /sockets/api-2.sock
+
+  load-balancer:
+    build: ./LoadBalancer
+    platform: linux/amd64
+    ports:
+      - "9999:9999"
+    volumes:
+      - sockets:/sockets
+    depends_on:
+      - api-1
+      - api-2
+    deploy:
+      resources:
+        limits:
+          cpus: "0.30"
+          memory: 50MB
+
+volumes:
+  sockets:
